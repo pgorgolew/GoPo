@@ -1,15 +1,6 @@
-func get_sum(n1, n2, n3){
-	return n1 + n2 + n3
-}
+a=3
+b=list(1...4)
+b.add(20)
+b.add(-4)
+b.filter(>=-2).foreach(s->print(s))
 
-my_list = list(1...10)
-
-my_list.forEach(s->print(s))
-
-my_list.filter(%2==0).forEach(s->print(s))
-
-a = 1
-b = 2
-c = 3
-
-print(get_sum(a,b,c))

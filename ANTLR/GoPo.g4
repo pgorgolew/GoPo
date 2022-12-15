@@ -5,47 +5,61 @@ grammar GoPo;
  */
 
 parse
- : block EOF
+ : block_newline EOF
  ;
 
 block
  : stat*
  ;
 
+block_newline
+ : stat_newline*
+ ;
+
+stat_newline
+ : stat NEWLINE
+ ;
+
 stat
- : assignment
+ : list_expr
+ | assignment
  | if_stat
  | while_stat
  | print
  ;
 
-assignment		
-  : ID ASSIGN expr NEWLINE
-  ;
-
-if_stat
-  : IF condition_block (ELIF condition_block)* (ELSE stat_block)? NEWLINE
-  ;
-
-condition_block	
-  : expr stat_block
-  ;
-
-stat_block		
+stat_block
   : OBRACE block CBRACE
   | stat
   ;
 
+stat_block_newline
+  : OBRACE block_newline CBRACE
+  | stat_newline
+  ;
+
+assignment		
+  : ID ASSIGN expr
+  ;
+
+if_stat
+  : IF condition_block (ELIF condition_block)* (ELSE stat_block)?
+  ;
+
+condition_block	
+  : expr stat_block_newline
+  ;
+
 while_stat		
-  : WHILE expr stat_block NEWLINE
+  : WHILE expr stat_block_newline
   ;
 
 func_stat
-  : FUNC OPAR (ID (COMMA ID)*)? CPAR stat_block RETURN expr NEWLINE
+  : FUNC OPAR (ID (COMMA ID)*)? CPAR stat_block_newline RETURN expr
   ;
 
 print		
-  : PRINT OPAR expr CPAR NEWLINE
+  : PRINT OPAR expr CPAR
   ;
 
 expr
@@ -54,22 +68,22 @@ expr
   ;
 
 list_expr
-  : (list | ID) list_expr		
-  | DOT sort list_expr
-  | DOT map list_expr
-  | DOT filter list_expr
-  | DOT skip list_expr
-  | DOT limit list_expr	
-  | DOT reverse list_expr
-  | DOT drop NEWLINE
-  | DOT count NEWLINE
-  | DOT sum NEWLINE
-  | DOT contains NEWLINE
-  | DOT isempty NEWLINE
-  | DOT clear NEWLINE
-  | DOT foreach NEWLINE				
-  | DOT add NEWLINE				
-  | NEWLINE					
+  : (list | ID) list_expr?
+  | DOT sort list_expr?
+  | DOT map list_expr?
+  | DOT filter list_expr?
+  | DOT skip_values list_expr?
+  | DOT limit list_expr?
+  | DOT reverse list_expr?
+  | DOT drop
+  | DOT count
+  | DOT sum
+  | DOT contains
+  | DOT isempty
+  | DOT clear
+  | DOT foreach
+  | DOT add
+  ;
 
 casual_expr
  : casual_expr POW casual_expr			          	#powExpr
@@ -92,30 +106,30 @@ atom
  | (TRUE | FALSE) #booleanAtom
  | ID             #idAtom
  | STRING         #stringAtom
- | NULL           #nullAtom
+ | NONE           #nullAtom
  ;
 
-#LIST CREATION
+//LIST CREATION
 list		: LIST OPAR ( RANGE | NUMBER (COMMA NUMBER)* )? CPAR;
 
-#LISTS METHODS RETURNING LISTS
-sort		: SORT OPAR (PLUS | MINUS) CPAR;
+//LISTS METHODS RETURNING LISTS
+sort		: SORT OPAR PLUS CPAR;
 map		: MAP OPAR ((OPERATOR NUMBER) | LOG) CPAR;
 filter	: FILTER OPAR COMPARATOR NUMBER CPAR;
-skip		: SKIP OPAR NUMBER_PLUS CPAR;
+skip_values		: SKIP_VALUES OPAR NUMBER_PLUS CPAR;
 limit		: LIMIT OPAR NUMBER_PLUS CPAR;
-reverse	: REVERSE OPAR CPAR:
+reverse	: REVERSE OPAR CPAR;
 
-#LISTS METHODS RETURNING NUMBERS
+//LISTS METHODS RETURNING NUMBERS
 drop		: DROP OPAR NUMBER CPAR;
 count		: COUNT OPAR CPAR;
 sum		: SUM OPAR CPAR;
 
-#LISTS METHODS RETURNING BOOL
+//LISTS METHODS RETURNING BOOL
 contains	: CONTAINS OPAR NUMBER CPAR;
 isempty	: ISEMPTY OPAR CPAR;
 
-#OTHERS LISTS METHODS
+//OTHERS LISTS METHODS
 clear		: CLEAR OPAR CPAR;
 foreach	: FOREACH OPAR ID '->' stat_block CPAR;
 add		: ADD OPAR NUMBER CPAR;
@@ -124,12 +138,12 @@ add		: ADD OPAR NUMBER CPAR;
  * Lexer Rules
  */
 
-#LISTS KEYWORDS
+//LISTS KEYWORDS
 LIST		: 'list';
 SORT		: 'sort';
 MAP		: 'map';
 FILTER	: 'filter';
-SKIP		: 'skip';
+SKIP_VALUES		: 'skip';
 LIMIT		: 'limit';
 REVERSE	: 'reverse';
 DROP		: 'drop';
@@ -184,13 +198,11 @@ RETURN	: 'return';
 
 RANGE		: NUMBER '...' NUMBER;
 STRING	: '"' (~["\r\n] | '""')* '"' ;
-NUMBER_PLUS : FLOAT | INT;
 NUMBER	: '-'? NUMBER_PLUS;
-FLOAT		: (INT | DIGIT) '.' DIGIT*;
-INT		: DIGITPLUS DIGIT* ;
+NUMBER_PLUS : FLOAT | INT;
+FLOAT		: ('0' | ([1-9] [0-9]*)) '.' [0-9]*;
+INT		: [1-9] [0-9]* ;
 NEWLINE 	: [\r\n]+ ;
-DIGIT_PLUS  : [1-9] ;
-DIGIT		: 0 | DIGITPLUS ;
 ID		: [a-zA-Z_] [a-zA-Z_0-9]* ;
 COMMENT	: '#' ~[\r\n]* -> skip ;
 WHITESPACES : [ \t]+ -> skip ;
