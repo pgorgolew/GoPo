@@ -8,201 +8,184 @@ parse
  : block_newline EOF
  ;
 
-block
- : stat*
- ;
-
 block_newline
- : stat_newline*
+ : (stat_newline | conditon_stat)*
  ;
 
 stat_newline
- : stat NEWLINE
+ : stat NEWLINES
  ;
 
 stat
  : list_expr
  | assignment
- | if_stat
- | while_stat
  | print
  ;
 
-stat_block
-  : OBRACE block CBRACE
-  | stat
+conditon_stat
+  : if_stat
+  | while_stat
   ;
 
 stat_block_newline
-  : OBRACE block_newline CBRACE
+  : OBRACE NEWLINES? block_newline CBRACE NEWLINES?
   | stat_newline
+  | conditon_stat
   ;
 
 assignment		
-  : ID ASSIGN expr
+  : ID ASSIGN expression
   ;
 
 if_stat
-  : IF condition_block (ELIF condition_block)* (ELSE stat_block)?
+  : IF condition_block (ELIF condition_block)* (ELSE condition_body)?
   ;
 
 condition_block	
-  : expr stat_block_newline
+  : expression condition_body
   ;
 
-while_stat		
-  : WHILE expr stat_block_newline
+condition_body
+  :  NEWLINES? stat_block_newline
   ;
 
-func_stat
-  : FUNC OPAR (ID (COMMA ID)*)? CPAR stat_block_newline RETURN expr
+while_stat
+  : WHILE condition_block
   ;
 
 print		
-  : PRINT OPAR expr CPAR
-  ;
-
-expr
-  : list_expr
-  | casual_expr
+  : PRINT OPAR expression CPAR
   ;
 
 list_expr
-  : (list | ID) list_expr?
-  | DOT sort list_expr?
-  | DOT map list_expr?
-  | DOT filter list_expr?
-  | DOT skip_values list_expr?
-  | DOT limit list_expr?
-  | DOT reverse list_expr?
-  | DOT drop
-  | DOT count
-  | DOT sum
-  | DOT contains
-  | DOT isempty
-  | DOT clear
-  | DOT foreach
-  | DOT add
+  :  (list | ID) list_expr_rec?
   ;
 
-casual_expr
- : casual_expr POW casual_expr			          	#powExpr
- | MINUS casual_expr                           			#unaryMinusExpr
- | NOT casual_expr                            		 	#notExpr
- | casual_expr op=(MULT | DIV | MOD) casual_expr      	#multiplicationExpr
- | casual_expr op=(PLUS | MINUS) casual_expr          	#additiveExpr
- | ABS OPAR casual_expr CPAR          	    			#absoluteExpr
- | LOG OPAR casual_expr CPAR			    			#log10Expr
- | casual_expr op=(LTEQ | GTEQ | LT | GT) casual_expr 	#relationalExpr
- | casual_expr op=(EQ | NEQ) casual_expr              	#equalityExpr
- | casual_expr AND casual_expr                        	#andExpr
- | casual_expr OR casual_expr                         	#orExpr
- | atom                                 				#atomExpr
+list_expr_rec
+  : DOT (sort | map | filter | reverse) list_expr_rec?
+  | DOT (drop | count | sum | contains | is_empty | clear | foreach | add | remove | remove_all)
+  ;
+
+expression
+ : expression POW expression
+ | MINUS expression
+ | NOT expression
+ | expression (MULT | DIV | MOD) expression
+ | expression (PLUS | MINUS) expression
+ | ABS OPAR expression CPAR
+ | LOG OPAR expression CPAR
+ | expression (LTEQ | GTEQ | LT | GT) expression
+ | expression (EQ | NEQ) expression
+ | expression AND expression
+ | expression OR expression
+ | atom
  ;
 
 atom
- : OPAR casual_expr CPAR #parExpr
- | NUMBER		#numberAtom
- | (TRUE | FALSE) #booleanAtom
- | ID             #idAtom
- | STRING         #stringAtom
- | NONE           #nullAtom
+ : OPAR expression CPAR
+ | list_expr
+ | NUMBER
+ | (TRUE | FALSE)
+ | ID
+ | STRING
+ | NONE
  ;
 
 //LIST CREATION
 list		: LIST OPAR ( RANGE | NUMBER (COMMA NUMBER)* )? CPAR;
 
 //LISTS METHODS RETURNING LISTS
-sort		: SORT OPAR PLUS CPAR;
-map		: MAP OPAR ((OPERATOR NUMBER) | LOG) CPAR;
-filter	: FILTER OPAR COMPARATOR NUMBER CPAR;
-skip_values		: SKIP_VALUES OPAR NUMBER_PLUS CPAR;
-limit		: LIMIT OPAR NUMBER_PLUS CPAR;
+sort		: SORT OPAR (PLUS | MINUS) CPAR;
+map		: MAP OPAR (((ABS | POW | MOD | DIV | MULT | MINUS | PLUS) NUMBER) | LOG) CPAR;
+filter	: FILTER OPAR (EQ | NEQ | GT | LT | GTEQ | LTEQ) NUMBER CPAR;
 reverse	: REVERSE OPAR CPAR;
 
 //LISTS METHODS RETURNING NUMBERS
-drop		: DROP OPAR NUMBER CPAR;
+drop		: DROP OPAR NUMBER? CPAR; // NUMBER IS AN INDEX
 count		: COUNT OPAR CPAR;
-sum		: SUM OPAR CPAR;
+sum		    : SUM OPAR CPAR;
 
 //LISTS METHODS RETURNING BOOL
 contains	: CONTAINS OPAR NUMBER CPAR;
-isempty	: ISEMPTY OPAR CPAR;
+is_empty	    : ISEMPTY OPAR CPAR;
 
 //OTHERS LISTS METHODS
 clear		: CLEAR OPAR CPAR;
-foreach	: FOREACH OPAR ID '->' stat_block CPAR;
-add		: ADD OPAR NUMBER CPAR;
-
+foreach	    : FOREACH OPAR ID '->' (stat | stat_block_newline)  CPAR;
+add		    : ADD OPAR NUMBER CPAR;
+remove      : REMOVE OPAR NUMBER CPAR; // NUMBER IS a VALUE IN LIST
+remove_all  : REMOVE_ALL OPAR NUMBER CPAR; // NUMBER IS a VALUE IN LIST
 /*
  * Lexer Rules
  */
 
 //LISTS KEYWORDS
-LIST		: 'list';
-SORT		: 'sort';
-MAP		: 'map';
-FILTER	: 'filter';
-SKIP_VALUES		: 'skip';
-LIMIT		: 'limit';
-REVERSE	: 'reverse';
-DROP		: 'drop';
-COUNT		: 'count';
-SUM		: 'sum';
-ADD		: 'add';
-FOREACH	: 'foreach';
-CLEAR		: 'clear';
-ISEMPTY	: 'isEmpty';
-CONTAINS	: 'contains';
+LIST		    : 'list';
+SORT		    : 'sort';
+MAP		        : 'map';
+FILTER	        : 'filter';
+LIMIT	    	: 'limit';
+REVERSE	        : 'reverse';
+DROP		    : 'drop';
+REMOVE          : 'remove';
+REMOVE_ALL      : 'removeAll';
+COUNT		    : 'count';
+SUM	    	    : 'sum';
+ADD		        : 'add';
+FOREACH	        : 'forEach';
+CLEAR		    : 'clear';
+ISEMPTY	        : 'isEmpty';
+CONTAINS	    : 'contains';
 
-OPERATOR	: ABS | POW | MOD | DIV | MULT | MINUS | PLUS;
-COMPARATOR	: EQ | NEQ | GT | LT | GTEQ | LTEQ;
 PRINT		: 'print';
 
-OR 		: 'or';
+OR 		    : 'or';
 AND 		: 'and';
-EQ 		: '==';
+EQ 		    : '==';
 NEQ 		: '!=';
-GT 		: '>';
-LT 		: '<';
+GT 		    : '>';
+LT 		    : '<';
 GTEQ 		: '>=';
 LTEQ 		: '<=';
 PLUS 		: '+';
-MINUS 	: '-';
+MINUS       : '-';
 MULT 		: '*';
 DIV 		: '/';
 MOD 		: 'mod';
 POW 		: 'pow';
-ABS		: 'abs';
+ABS		    : 'abs';
 LOG 		: 'log';
-NOT 		: '!';
+NOT 		: 'not';
 
-SCOL 		: ';';
-ASSIGN 	: '=';
+ASSIGN 	    : '=';
 OPAR 		: '(';
 CPAR 		: ')';
-OBRACE 	: '{';
-CBRACE 	: '}';
-DOT		: '.';
+OBRACE 	    : '{';
+CBRACE 	    : '}';
+DOT		    : '.';
 COMMA		: ',';
 
 TRUE 		: 'true';
-FALSE 	: 'false';
+FALSE 	    : 'false';
 NONE 		: 'none';
-IF 		: 'if';
+IF 		    : 'if';
 ELSE 		: 'else';
 ELIF		: 'elif' | 'else if';
-WHILE 	: 'while';
-FUNC		: 'func';
-RETURN	: 'return';
+WHILE 	    : 'while';
 
-RANGE		: NUMBER '...' NUMBER;
-STRING	: '"' (~["\r\n] | '""')* '"' ;
-NUMBER	: '-'? NUMBER_PLUS;
-NUMBER_PLUS : FLOAT | INT;
-FLOAT		: ('0' | ([1-9] [0-9]*)) '.' [0-9]*;
-INT		: [1-9] [0-9]* ;
-NEWLINE 	: [\r\n]+ ;
-ID		: [a-zA-Z_] [a-zA-Z_0-9]* ;
-COMMENT	: '#' ~[\r\n]* -> skip ;
-WHITESPACES : [ \t]+ -> skip ;
+// not used right now
+FUNC		: 'func';
+RETURN	    : 'return';
+
+RANGE	    	: NUMBER '...' NUMBER ;
+STRING  	    : '"' (~["\r\n] | '""')* '"' ;
+NUMBER  	    : '-'? NUMBER_PLUS;
+NUMBER_PLUS     : FLOAT | INT;
+FLOAT	    	: INT '.' [0-9]*;
+INT		        : '0' | ([1-9] [0-9]*) ;
+NEWLINE 	    : ('\r' | '\n') ;
+NEWLINES 	    : NEWLINE+ ;
+ID		        : [a-zA-Z_] [a-zA-Z_0-9]* ;
+COMMENT	        : '#' ~[\r\n]* -> skip ;
+WHITESPACES     : [ \t]+ -> skip ;
+ANY             : . ;
