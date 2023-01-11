@@ -14,7 +14,7 @@ if a==b {
 }
 elif a >= b
     z = abs(a / 5 - 200) + b
-elif a - 10 < b {
+else if a - 10 < b {
     z = list(1...10).map(log).sum()
     print(z)
 } else

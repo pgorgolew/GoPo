@@ -2,6 +2,7 @@
 1. create venv and activate
 2. pip install antlr4-tools
 3. antlr4
+4. pip install antlr4-python3-runtime
 
 # Running ANTLR
 
