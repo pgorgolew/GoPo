@@ -79,18 +79,73 @@ class GoPoVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by GoPoParser#expression.
-    def visitExpression(self, ctx:GoPoParser.ExpressionContext):
+    # Visit a parse tree produced by GoPoParser#logicExpr.
+    def visitLogicExpr(self, ctx:GoPoParser.LogicExprContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by GoPoParser#atom.
-    def visitAtom(self, ctx:GoPoParser.AtomContext):
+    # Visit a parse tree produced by GoPoParser#parentnessExpr.
+    def visitParentnessExpr(self, ctx:GoPoParser.ParentnessExprContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by GoPoParser#list.
-    def visitList(self, ctx:GoPoParser.ListContext):
+    # Visit a parse tree produced by GoPoParser#atomExpr.
+    def visitAtomExpr(self, ctx:GoPoParser.AtomExprContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by GoPoParser#mathExprLeftRight.
+    def visitMathExprLeftRight(self, ctx:GoPoParser.MathExprLeftRightContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by GoPoParser#mathOneExprFun.
+    def visitMathOneExprFun(self, ctx:GoPoParser.MathOneExprFunContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by GoPoParser#listExprAtom.
+    def visitListExprAtom(self, ctx:GoPoParser.ListExprAtomContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by GoPoParser#numberAtom.
+    def visitNumberAtom(self, ctx:GoPoParser.NumberAtomContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by GoPoParser#boolAtom.
+    def visitBoolAtom(self, ctx:GoPoParser.BoolAtomContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by GoPoParser#idAtom.
+    def visitIdAtom(self, ctx:GoPoParser.IdAtomContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by GoPoParser#stringAtom.
+    def visitStringAtom(self, ctx:GoPoParser.StringAtomContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by GoPoParser#noneAtom.
+    def visitNoneAtom(self, ctx:GoPoParser.NoneAtomContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by GoPoParser#rangeList.
+    def visitRangeList(self, ctx:GoPoParser.RangeListContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by GoPoParser#numbersList.
+    def visitNumbersList(self, ctx:GoPoParser.NumbersListContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by GoPoParser#emptyList.
+    def visitEmptyList(self, ctx:GoPoParser.EmptyListContext):
         return self.visitChildren(ctx)
 
 
@@ -99,8 +154,13 @@ class GoPoVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by GoPoParser#map.
-    def visitMap(self, ctx:GoPoParser.MapContext):
+    # Visit a parse tree produced by GoPoParser#mapOpWithNum.
+    def visitMapOpWithNum(self, ctx:GoPoParser.MapOpWithNumContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by GoPoParser#mapOpWithoutNum.
+    def visitMapOpWithoutNum(self, ctx:GoPoParser.MapOpWithoutNumContext):
         return self.visitChildren(ctx)
 
 
@@ -114,8 +174,13 @@ class GoPoVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by GoPoParser#drop.
-    def visitDrop(self, ctx:GoPoParser.DropContext):
+    # Visit a parse tree produced by GoPoParser#dropLast.
+    def visitDropLast(self, ctx:GoPoParser.DropLastContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by GoPoParser#dropWithIndex.
+    def visitDropWithIndex(self, ctx:GoPoParser.DropWithIndexContext):
         return self.visitChildren(ctx)
 
 

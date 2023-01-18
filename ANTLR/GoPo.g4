@@ -67,47 +67,57 @@ list_expr_rec
   ;
 
 expression
- : expression POW expression
- | MINUS expression
- | NOT expression
- | expression (MULT | DIV | MOD) expression
- | expression (PLUS | MINUS) expression
- | ABS OPAR expression CPAR
- | LOG OPAR expression CPAR
- | expression (LTEQ | GTEQ | LT | GT) expression
- | expression (EQ | NEQ) expression
- | expression AND expression
- | expression OR expression
- | atom
+ : left=expression op=POW right=expression                               #mathExprLeftRight
+ | OPAR expression CPAR                                                  #parentnessExpr
+ | op=MINUS expression                                                   #mathOneExprFun
+ | op=ABS OPAR expression CPAR                                           #mathOneExprFun
+ | op=LOG OPAR expression CPAR                                           #mathOneExprFun
+ | left=expression op=(MULT | DIV | MOD) right=expression                #mathExprLeftRight
+ | left=expression op=(PLUS | MINUS) right=expression                    #mathExprLeftRight
+ | left=expression op=(LTEQ | GTEQ | LT | GT) right=expression           #logicExpr
+ | left=expression op=(EQ | NEQ) right=expression                        #logicExpr
+ | left=expression op=AND right=expression                               #logicExpr
+ | left=expression op=OR right=expression                                #logicExpr
+ | op=NOT expression                                                     #logicExpr
+ | atom                                                                  #atomExpr
  ;
 
 atom
- : OPAR expression CPAR
- | list_expr
- | NUMBER
- | (TRUE | FALSE)
- | ID
- | STRING
- | NONE
+ : list_expr                                                #listExprAtom
+ | NUMBER                                                   #numberAtom
+ | (TRUE | FALSE)                                           #boolAtom
+ | ID                                                       #idAtom
+ | STRING                                                   #stringAtom
+ | NONE                                                     #noneAtom
  ;
 
 //LIST CREATION
-list		: LIST OPAR ( RANGE | NUMBER (COMMA NUMBER)* )? CPAR;
+list
+  : LIST OPAR RANGE CPAR                                                #rangeList
+  | LIST OPAR numbers+=NUMBER (COMMA numbers+=NUMBER)* CPAR             #numbersList
+  | LIST OPAR CPAR                                                      #emptyList
+  ;
 
 //LISTS METHODS RETURNING LISTS
 sort		: SORT OPAR (PLUS | MINUS) CPAR;
-map		: MAP OPAR (((ABS | POW | MOD | DIV | MULT | MINUS | PLUS) NUMBER) | LOG) CPAR;
-filter	: FILTER OPAR (EQ | NEQ | GT | LT | GTEQ | LTEQ) NUMBER CPAR;
+map
+  : MAP OPAR op=(POW | MOD | DIV | MULT | MINUS | PLUS) NUMBER CPAR         #mapOpWithNum
+  | MAP OPAR op=(ABS| LOG) CPAR                                             #mapOpWithoutNum
+  ;
+filter	: FILTER OPAR op=(EQ | NEQ | GT | LT | GTEQ | LTEQ) NUMBER CPAR;
 reverse	: REVERSE OPAR CPAR;
 
 //LISTS METHODS RETURNING NUMBERS
-drop		: DROP OPAR NUMBER? CPAR; // NUMBER IS AN INDEX
+drop
+  : DROP OPAR CPAR                                                          #dropLast
+  | DROP OPAR NUMBER CPAR                                                   #dropWithIndex
+  ;
 count		: COUNT OPAR CPAR;
 sum		    : SUM OPAR CPAR;
 
 //LISTS METHODS RETURNING BOOL
 contains	: CONTAINS OPAR NUMBER CPAR;
-is_empty	    : ISEMPTY OPAR CPAR;
+is_empty	: ISEMPTY OPAR CPAR;
 
 //OTHERS LISTS METHODS
 clear		: CLEAR OPAR CPAR;
@@ -177,14 +187,13 @@ WHILE 	    : 'while';
 FUNC		: 'func';
 RETURN	    : 'return';
 
-RANGE	    	: NUMBER '...' NUMBER ;
+RANGE	    	: INT '...' INT ;
 STRING  	    : '"' (~["\r\n] | '""')* '"' ;
 NUMBER  	    : '-'? NUMBER_PLUS;
 NUMBER_PLUS     : FLOAT | INT;
 FLOAT	    	: INT '.' [0-9]*;
 INT		        : '0' | ([1-9] [0-9]*) ;
-NEWLINE 	    : ('\r' | '\n') ;
-NEWLINES 	    : NEWLINE+ ;
+NEWLINES	    : ('\r' | '\n')+ ;
 ID		        : [a-zA-Z_] [a-zA-Z_0-9]* ;
 COMMENT	        : '#' ~[\r\n]* -> skip ;
 WHITESPACES     : [ \t]+ -> skip ;
