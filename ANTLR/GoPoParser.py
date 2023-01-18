@@ -293,6 +293,12 @@ class GoPoParser ( Parser ):
             if hasattr( listener, "exitParse" ):
                 listener.exitParse(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitParse" ):
+                return visitor.visitParse(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -346,6 +352,12 @@ class GoPoParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitBlock_newline" ):
                 listener.exitBlock_newline(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitBlock_newline" ):
+                return visitor.visitBlock_newline(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -413,6 +425,12 @@ class GoPoParser ( Parser ):
             if hasattr( listener, "exitStat_newline" ):
                 listener.exitStat_newline(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitStat_newline" ):
+                return visitor.visitStat_newline(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -464,6 +482,12 @@ class GoPoParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitStat" ):
                 listener.exitStat(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitStat" ):
+                return visitor.visitStat(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -529,6 +553,12 @@ class GoPoParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitConditon_stat" ):
                 listener.exitConditon_stat(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitConditon_stat" ):
+                return visitor.visitConditon_stat(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -604,6 +634,12 @@ class GoPoParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitStat_block_newline" ):
                 listener.exitStat_block_newline(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitStat_block_newline" ):
+                return visitor.visitStat_block_newline(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -692,6 +728,12 @@ class GoPoParser ( Parser ):
             if hasattr( listener, "exitAssignment" ):
                 listener.exitAssignment(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitAssignment" ):
+                return visitor.visitAssignment(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -756,6 +798,12 @@ class GoPoParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitIf_stat" ):
                 listener.exitIf_stat(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitIf_stat" ):
+                return visitor.visitIf_stat(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -828,6 +876,12 @@ class GoPoParser ( Parser ):
             if hasattr( listener, "exitCondition_block" ):
                 listener.exitCondition_block(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitCondition_block" ):
+                return visitor.visitCondition_block(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -874,6 +928,12 @@ class GoPoParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitCondition_body" ):
                 listener.exitCondition_body(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitCondition_body" ):
+                return visitor.visitCondition_body(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -929,6 +989,12 @@ class GoPoParser ( Parser ):
             if hasattr( listener, "exitWhile_stat" ):
                 listener.exitWhile_stat(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitWhile_stat" ):
+                return visitor.visitWhile_stat(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -981,6 +1047,12 @@ class GoPoParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitPrint" ):
                 listener.exitPrint(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitPrint" ):
+                return visitor.visitPrint(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -1036,6 +1108,12 @@ class GoPoParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitList_expr" ):
                 listener.exitList_expr(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitList_expr" ):
+                return visitor.visitList_expr(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -1157,6 +1235,12 @@ class GoPoParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitList_expr_rec" ):
                 listener.exitList_expr_rec(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitList_expr_rec" ):
+                return visitor.visitList_expr_rec(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -1352,6 +1436,12 @@ class GoPoParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitExpression" ):
                 listener.exitExpression(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitExpression" ):
+                return visitor.visitExpression(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -1594,6 +1684,12 @@ class GoPoParser ( Parser ):
             if hasattr( listener, "exitAtom" ):
                 listener.exitAtom(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitAtom" ):
+                return visitor.visitAtom(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -1709,6 +1805,12 @@ class GoPoParser ( Parser ):
             if hasattr( listener, "exitList" ):
                 listener.exitList(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitList" ):
+                return visitor.visitList(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -1793,6 +1895,12 @@ class GoPoParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitSort" ):
                 listener.exitSort(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitSort" ):
+                return visitor.visitSort(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -1879,6 +1987,12 @@ class GoPoParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitMap" ):
                 listener.exitMap(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitMap" ):
+                return visitor.visitMap(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -1974,6 +2088,12 @@ class GoPoParser ( Parser ):
             if hasattr( listener, "exitFilter" ):
                 listener.exitFilter(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitFilter" ):
+                return visitor.visitFilter(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -2035,6 +2155,12 @@ class GoPoParser ( Parser ):
             if hasattr( listener, "exitReverse" ):
                 listener.exitReverse(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitReverse" ):
+                return visitor.visitReverse(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -2088,6 +2214,12 @@ class GoPoParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitDrop" ):
                 listener.exitDrop(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitDrop" ):
+                return visitor.visitDrop(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -2149,6 +2281,12 @@ class GoPoParser ( Parser ):
             if hasattr( listener, "exitCount" ):
                 listener.exitCount(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitCount" ):
+                return visitor.visitCount(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -2199,6 +2337,12 @@ class GoPoParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitSum" ):
                 listener.exitSum(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitSum" ):
+                return visitor.visitSum(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -2254,6 +2398,12 @@ class GoPoParser ( Parser ):
             if hasattr( listener, "exitContains" ):
                 listener.exitContains(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitContains" ):
+                return visitor.visitContains(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -2307,6 +2457,12 @@ class GoPoParser ( Parser ):
             if hasattr( listener, "exitIs_empty" ):
                 listener.exitIs_empty(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitIs_empty" ):
+                return visitor.visitIs_empty(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -2357,6 +2513,12 @@ class GoPoParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitClear" ):
                 listener.exitClear(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitClear" ):
+                return visitor.visitClear(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -2419,6 +2581,12 @@ class GoPoParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitForeach" ):
                 listener.exitForeach(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitForeach" ):
+                return visitor.visitForeach(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -2492,6 +2660,12 @@ class GoPoParser ( Parser ):
             if hasattr( listener, "exitAdd" ):
                 listener.exitAdd(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitAdd" ):
+                return visitor.visitAdd(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -2548,6 +2722,12 @@ class GoPoParser ( Parser ):
             if hasattr( listener, "exitRemove" ):
                 listener.exitRemove(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitRemove" ):
+                return visitor.visitRemove(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -2603,6 +2783,12 @@ class GoPoParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitRemove_all" ):
                 listener.exitRemove_all(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitRemove_all" ):
+                return visitor.visitRemove_all(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 

@@ -8,7 +8,7 @@
 
 Command for generating parser code
 
-```antlr4 -Dlanguage=Python3 GoPo.g4```
+```antlr4 -o <ANTLR_DIR_PATH> -listener -visitor -Dlanguage=Python3 -lib <ANTLR_DIR_PATH> <GRAMMAR_PATH>```
 
 Command for tree view and gui with input from terminal
 
