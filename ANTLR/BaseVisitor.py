@@ -153,6 +153,10 @@ class BaseVisitor(GoPoVisitor):
         self.tmp_memory['list'] = list(filter(lambda e: e != number_to_remove, self.tmp_memory['list']))
         return self.visitChildren(ctx)
 
+    def visitReverse(self, ctx:GoPoParser.ReverseContext):
+        self.tmp_memory['list'].reverse()
+        return self.visitChildren(ctx)
+
     @staticmethod
     def convert_str_to_numeric(s):
         try:
