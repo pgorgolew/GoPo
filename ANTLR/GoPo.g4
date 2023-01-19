@@ -59,6 +59,7 @@ print
 
 list_expr
   :  (list | ID) list_expr_rec?
+  |
   ;
 
 list_expr_rec
