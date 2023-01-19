@@ -1,3 +1,5 @@
+from tokenize import String
+
 from GoPoVisitor import GoPoVisitor
 from GoPoParser import GoPoParser
 from math import log10
@@ -13,6 +15,8 @@ lambda_two_args_by_operator = {
     GoPoParser.GTEQ: lambda x, y: x >= y,
     GoPoParser.LT: lambda x, y: x < y,
     GoPoParser.GT: lambda x, y: x > y,
+    GoPoParser.EQ: lambda x, y: x == y,
+    GoPoParser.NEQ: lambda x, y: x != y
 }
 
 lambda_one_arg_by_operator = {
@@ -132,6 +136,15 @@ class BaseVisitor(GoPoVisitor):
         self.tmp_memory['list'].remove(number_to_remove)
         return self.visitChildren(ctx)
 
+    def visitFilter(self, ctx:GoPoParser.FilterContext):
+        operator = self.visit(ctx.getChild(2))
+        value = self.convert_str_to_numeric(self.visit(ctx.getChild(3)))
+
+        function = self.get_function_from_operator(operator)
+        self.tmp_memory['list'] = [x for x in self.tmp_memory['list'] if function(x, value)]
+
+        return self.visitChildren(ctx)
+
     def visitRemove_all(self, ctx: GoPoParser.Remove_allContext):
         number_to_remove = self.convert_str_to_numeric(ctx.getChild(2).accept(self))
         if number_to_remove not in self.tmp_memory['list']:
@@ -153,3 +166,19 @@ class BaseVisitor(GoPoVisitor):
             raise VariableNotInitializedException(f"{var_name} was not initialized before")
 
         return self.memory[var_name]
+
+    @staticmethod
+    def get_function_from_operator(operator: String):
+        match operator:
+            case ">=":
+                return lambda_two_args_by_operator[GoPoParser.GTEQ]
+            case "<=":
+                return lambda_two_args_by_operator[GoPoParser.LT]
+            case ">":
+                return lambda_two_args_by_operator[GoPoParser.GT]
+            case "<":
+                return lambda_two_args_by_operator[GoPoParser.LT]
+            case "==":
+                return lambda_two_args_by_operator[GoPoParser.EQ]
+            case "!=":
+                return lambda_two_args_by_operator[GoPoParser.NEQ]
