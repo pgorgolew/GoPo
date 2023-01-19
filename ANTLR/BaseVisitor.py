@@ -25,6 +25,8 @@ lambda_one_arg_by_operator = {
 class VariableNotInitializedException(Exception):
     pass
 
+class VariableNotInList(Exception):
+    pass
 
 class BaseVisitor(GoPoVisitor):
     def __init__(self):
@@ -96,15 +98,15 @@ class BaseVisitor(GoPoVisitor):
     def visitEmptyList(self, ctx: GoPoParser.EmptyListContext):
         return list()
 
-    def visitList_expr(self, ctx:GoPoParser.List_exprContext):
+    def visitList_expr(self, ctx: GoPoParser.List_exprContext):
         if ctx.getChildCount() > 1:
             list_child = ctx.getChild(0)
             if list_child.symbol.type == GoPoParser.ID:
-                created_list = self.get_from_memory(list_child.accept(self))
+                tmp_list = self.get_from_memory(list_child.accept(self))
             else:
-                created_list = list_child.accept(self)
+                tmp_list = list_child.accept(self)
 
-            self.tmp_memory['list'] = created_list
+            self.tmp_memory['list'] = tmp_list
             ctx.getChild(1).accept(self)
 
             result = self.tmp_memory['list']
@@ -113,15 +115,30 @@ class BaseVisitor(GoPoVisitor):
 
         return self.visitChildren(ctx)
 
-
-    def visitList_expr_rec(self, ctx:GoPoParser.List_expr_recContext):
+    def visitList_expr_rec(self, ctx: GoPoParser.List_expr_recContext):
         ctx.getChild(1).accept(self)
         if ctx.getChildCount() > 2:
             ctx.getChild(2).accept(self)
 
-    def visitAdd(self, ctx:GoPoParser.AddContext):
+    def visitAdd(self, ctx: GoPoParser.AddContext):
         added_number = self.convert_str_to_numeric(ctx.getChild(2).accept(self))
         self.tmp_memory['list'].append(added_number)
+
+    def visitRemove(self, ctx: GoPoParser.RemoveContext):
+        number_to_remove = self.convert_str_to_numeric(ctx.getChild(2).accept(self))
+        if number_to_remove not in self.tmp_memory['list']:
+            raise VariableNotInList(f"{number_to_remove} not in list")
+
+        self.tmp_memory['list'].remove(number_to_remove)
+        return self.visitChildren(ctx)
+
+    def visitRemove_all(self, ctx: GoPoParser.Remove_allContext):
+        number_to_remove = self.convert_str_to_numeric(ctx.getChild(2).accept(self))
+        if number_to_remove not in self.tmp_memory['list']:
+            raise VariableNotInList(f"{number_to_remove} not in list")
+
+        self.tmp_memory['list'] = list(filter(lambda e: e != number_to_remove, self.tmp_memory['list']))
+        return self.visitChildren(ctx)
 
     @staticmethod
     def convert_str_to_numeric(s):
@@ -130,7 +147,6 @@ class BaseVisitor(GoPoVisitor):
         except ValueError:
             s = float(s)
         return s
-
 
     def get_from_memory(self, var_name):
         if var_name not in self.memory:
