@@ -105,7 +105,7 @@ class BaseVisitor(GoPoVisitor):
     def visitList_expr(self, ctx: GoPoParser.List_exprContext):
         if ctx.getChildCount() > 1:
             list_child = ctx.getChild(0)
-            if list_child.symbol.type == GoPoParser.ID:
+            if hasattr(list_child, 'property') and list_child.symbol.type == GoPoParser.ID:
                 tmp_list = self.get_from_memory(list_child.accept(self))
             else:
                 tmp_list = list_child.accept(self)
