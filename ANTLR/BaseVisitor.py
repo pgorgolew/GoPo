@@ -1,3 +1,5 @@
+from tokenize import String
+
 from GoPoVisitor import GoPoVisitor
 from GoPoParser import GoPoParser
 from math import log10
@@ -126,8 +128,9 @@ class BaseVisitor(GoPoVisitor):
     def visitRangeList(self, ctx: GoPoParser.RangeListContext):
         used_range = ctx.getChild(2).accept(self)
         start, end = used_range.split("...")
+        step = 1 if start < end else -1
 
-        return list(range(int(start), int(end) + 1))
+        return list(range(int(start), int(end) + step, step))
 
     def visitNumbersList(self, ctx: GoPoParser.NumbersListContext):
         return [self.convert_str_to_numeric(number.text) for number in ctx.numbers]
@@ -138,7 +141,7 @@ class BaseVisitor(GoPoVisitor):
     def visitList_expr(self, ctx: GoPoParser.List_exprContext):
         if ctx.getChildCount() > 1:
             list_child = ctx.getChild(0)
-            if list_child.symbol.type == GoPoParser.ID:
+            if hasattr(list_child, 'symbol') and list_child.symbol.type == GoPoParser.ID:
                 tmp_list = self.get_from_memory(list_child.accept(self))
             else:
                 tmp_list = list_child.accept(self)
@@ -169,12 +172,31 @@ class BaseVisitor(GoPoVisitor):
         self.tmp_memory['list'].remove(number_to_remove)
         return self.visitChildren(ctx)
 
+    def visitFilter(self, ctx:GoPoParser.FilterContext):
+        operator = self.visit(ctx.getChild(2))
+        value = self.convert_str_to_numeric(self.visit(ctx.getChild(3)))
+
+        function = self.get_function_from_operator(operator)
+        self.tmp_memory['list'] = [x for x in self.tmp_memory['list'] if function(x, value)]
+
+        return self.visitChildren(ctx)
+
     def visitRemove_all(self, ctx: GoPoParser.Remove_allContext):
         number_to_remove = self.convert_str_to_numeric(ctx.getChild(2).accept(self))
         if number_to_remove not in self.tmp_memory['list']:
             raise VariableNotInList(f"{number_to_remove} not in list")
 
         self.tmp_memory['list'] = list(filter(lambda e: e != number_to_remove, self.tmp_memory['list']))
+        return self.visitChildren(ctx)
+
+    def visitReverse(self, ctx:GoPoParser.ReverseContext):
+        self.tmp_memory['list'].reverse()
+        return self.visitChildren(ctx)
+
+    def visitSort(self, ctx:GoPoParser.SortContext):
+        is_descending = False if self.visit(ctx.getChild(2)) == '+' else True
+        self.tmp_memory['list'].sort(reverse=is_descending)
+
         return self.visitChildren(ctx)
 
     @staticmethod
@@ -190,3 +212,19 @@ class BaseVisitor(GoPoVisitor):
             raise VariableNotInitializedException(f"{var_name} was not initialized before")
 
         return self.memory[var_name]
+
+    @staticmethod
+    def get_function_from_operator(operator: String):
+        match operator:
+            case ">=":
+                return lambda_two_args_by_operator[GoPoParser.GTEQ]
+            case "<=":
+                return lambda_two_args_by_operator[GoPoParser.LTEQ]
+            case ">":
+                return lambda_two_args_by_operator[GoPoParser.GT]
+            case "<":
+                return lambda_two_args_by_operator[GoPoParser.LT]
+            case "==":
+                return lambda_two_args_by_operator[GoPoParser.EQ]
+            case "!=":
+                return lambda_two_args_by_operator[GoPoParser.NEQ]
