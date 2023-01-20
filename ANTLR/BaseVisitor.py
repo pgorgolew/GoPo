@@ -171,10 +171,10 @@ class BaseVisitor(GoPoVisitor):
         return self.visitChildren(ctx)
 
     def visitFilter(self, ctx: GoPoParser.FilterContext):
-        operator = self.visit(ctx.getChild(2))
+        operator = ctx.op.type
+        function = lambda_two_args_by_operator[operator]
         value = self.convert_str_to_numeric(self.visit(ctx.getChild(3)))
 
-        function = self.get_function_from_operator(operator)
         self.tmp_memory['list'] = [x for x in self.tmp_memory['list'] if function(x, value)]
 
         return self.visitChildren(ctx)
@@ -192,7 +192,7 @@ class BaseVisitor(GoPoVisitor):
         return self.visitChildren(ctx)
 
     def visitSort(self, ctx: GoPoParser.SortContext):
-        is_descending = False if self.visit(ctx.getChild(2)) == '+' else True
+        is_descending = False if ctx.op.type == GoPoParser.PLUS else True
         self.tmp_memory['list'].sort(reverse=is_descending)
 
         return self.visitChildren(ctx)
@@ -210,19 +210,3 @@ class BaseVisitor(GoPoVisitor):
             raise VariableNotInitializedException(f"{var_name} was not initialized before")
 
         return self.memory[var_name]
-
-    @staticmethod
-    def get_function_from_operator(operator: String):
-        match operator:
-            case ">=":
-                return lambda_two_args_by_operator[GoPoParser.GTEQ]
-            case "<=":
-                return lambda_two_args_by_operator[GoPoParser.LTEQ]
-            case ">":
-                return lambda_two_args_by_operator[GoPoParser.GT]
-            case "<":
-                return lambda_two_args_by_operator[GoPoParser.LT]
-            case "==":
-                return lambda_two_args_by_operator[GoPoParser.EQ]
-            case "!=":
-                return lambda_two_args_by_operator[GoPoParser.NEQ]

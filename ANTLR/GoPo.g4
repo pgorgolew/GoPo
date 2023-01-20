@@ -100,7 +100,7 @@ list
   ;
 
 //LISTS METHODS RETURNING LISTS
-sort		: SORT OPAR (PLUS | MINUS) CPAR;
+sort		: SORT OPAR op=(PLUS | MINUS) CPAR;
 map
   : MAP OPAR op=(POW | MOD | DIV | MULT | MINUS | PLUS) NUMBER CPAR         #mapOpWithNum
   | MAP OPAR op=(ABS| LOG) CPAR                                             #mapOpWithoutNum
