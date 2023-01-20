@@ -38,7 +38,7 @@ assignment
   ;
 
 if_stat
-  : IF condition_block (ELIF condition_block)* (ELSE condition_body)?
+  : IF if_block=condition_block (ELIF elif_blocks+=condition_block)* (ELSE else_block=condition_body)?
   ;
 
 condition_block	
@@ -58,8 +58,8 @@ print
   ;
 
 list_expr
-  :  (list | ID) list_expr_rec?
-  |
+  :  list list_expr_rec?
+  |  ID list_expr_rec
   ;
 
 list_expr_rec
@@ -84,10 +84,10 @@ expression
  ;
 
 atom
- : list_expr                                                #listExprAtom
+ : ID                                                       #idAtom
+ | list_expr                                                #listExprAtom
  | NUMBER                                                   #numberAtom
  | (TRUE | FALSE)                                           #boolAtom
- | ID                                                       #idAtom
  | STRING                                                   #stringAtom
  | NONE                                                     #noneAtom
  ;

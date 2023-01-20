@@ -20,7 +20,7 @@ lambda_two_args_by_operator = {
 }
 
 lambda_one_arg_by_operator = {
-    GoPoParser.LOG: lambda x: log10(x),
+    GoPoParser.LOG: log10,
     GoPoParser.ABS: abs,
     GoPoParser.MINUS: lambda x: -x
 }
@@ -29,8 +29,10 @@ lambda_one_arg_by_operator = {
 class VariableNotInitializedException(Exception):
     pass
 
+
 class VariableNotInList(Exception):
     pass
+
 
 class BaseVisitor(GoPoVisitor):
     def __init__(self):
@@ -70,6 +72,37 @@ class BaseVisitor(GoPoVisitor):
         expression_result = ctx.expression().accept(self)
         operation = lambda_one_arg_by_operator[ctx.op.type]
         return operation(expression_result)
+
+    def visitLogicExpr(self, ctx: GoPoParser.LogicExprContext):
+        if ctx.op.type == GoPoParser.NOT:
+            return not self.visit(ctx.expression())
+
+        left = self.visit(ctx.left)
+        right = self.visit(ctx.right)
+        operation = lambda_two_args_by_operator[ctx.op.type]
+        return operation(left, right)
+
+    def visitCondition_block(self, ctx: GoPoParser.Condition_blockContext):
+        if not self.visit(ctx.expression()):
+            return False
+
+        self.visit(ctx.condition_body())
+        return True
+
+    def visitIf_stat(self, ctx: GoPoParser.If_statContext):
+        if self.visit(ctx.if_block):
+            return
+
+        for elif_block in ctx.elif_blocks:
+            if self.visit(elif_block):
+                return
+
+        if ctx.else_block is not None:
+            self.visit(ctx.else_block)
+
+    def visitWhile_stat(self, ctx: GoPoParser.While_statContext):
+        while self.visit(ctx.condition_block()):
+            pass
 
     def visitNumberAtom(self, ctx: GoPoParser.NumberAtomContext):
         res = ctx.getChild(0).accept(self)
@@ -137,7 +170,7 @@ class BaseVisitor(GoPoVisitor):
         self.tmp_memory['list'].remove(number_to_remove)
         return self.visitChildren(ctx)
 
-    def visitFilter(self, ctx:GoPoParser.FilterContext):
+    def visitFilter(self, ctx: GoPoParser.FilterContext):
         operator = self.visit(ctx.getChild(2))
         value = self.convert_str_to_numeric(self.visit(ctx.getChild(3)))
 
@@ -154,11 +187,11 @@ class BaseVisitor(GoPoVisitor):
         self.tmp_memory['list'] = list(filter(lambda e: e != number_to_remove, self.tmp_memory['list']))
         return self.visitChildren(ctx)
 
-    def visitReverse(self, ctx:GoPoParser.ReverseContext):
+    def visitReverse(self, ctx: GoPoParser.ReverseContext):
         self.tmp_memory['list'].reverse()
         return self.visitChildren(ctx)
 
-    def visitSort(self, ctx:GoPoParser.SortContext):
+    def visitSort(self, ctx: GoPoParser.SortContext):
         is_descending = False if self.visit(ctx.getChild(2)) == '+' else True
         self.tmp_memory['list'].sort(reverse=is_descending)
 
