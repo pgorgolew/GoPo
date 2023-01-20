@@ -157,6 +157,12 @@ class BaseVisitor(GoPoVisitor):
         self.tmp_memory['list'].reverse()
         return self.visitChildren(ctx)
 
+    def visitSort(self, ctx:GoPoParser.SortContext):
+        is_descending = False if self.visit(ctx.getChild(2)) == '+' else True
+        self.tmp_memory['list'].sort(reverse=is_descending)
+
+        return self.visitChildren(ctx)
+
     @staticmethod
     def convert_str_to_numeric(s):
         try:
