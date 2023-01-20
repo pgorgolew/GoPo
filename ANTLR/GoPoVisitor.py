@@ -104,6 +104,11 @@ class GoPoVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by GoPoParser#idAtom.
+    def visitIdAtom(self, ctx:GoPoParser.IdAtomContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by GoPoParser#listExprAtom.
     def visitListExprAtom(self, ctx:GoPoParser.ListExprAtomContext):
         return self.visitChildren(ctx)
@@ -116,11 +121,6 @@ class GoPoVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by GoPoParser#boolAtom.
     def visitBoolAtom(self, ctx:GoPoParser.BoolAtomContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by GoPoParser#idAtom.
-    def visitIdAtom(self, ctx:GoPoParser.IdAtomContext):
         return self.visitChildren(ctx)
 
 
