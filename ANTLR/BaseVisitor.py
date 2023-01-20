@@ -104,8 +104,6 @@ class BaseVisitor(GoPoVisitor):
         while self.visit(ctx.condition_block()):
             pass
 
-        return
-
     def visitNumberAtom(self, ctx: GoPoParser.NumberAtomContext):
         res = ctx.getChild(0).accept(self)
         res = self.convert_str_to_numeric(res)
@@ -172,7 +170,7 @@ class BaseVisitor(GoPoVisitor):
         self.tmp_memory['list'].remove(number_to_remove)
         return self.visitChildren(ctx)
 
-    def visitFilter(self, ctx:GoPoParser.FilterContext):
+    def visitFilter(self, ctx: GoPoParser.FilterContext):
         operator = self.visit(ctx.getChild(2))
         value = self.convert_str_to_numeric(self.visit(ctx.getChild(3)))
 
@@ -189,11 +187,11 @@ class BaseVisitor(GoPoVisitor):
         self.tmp_memory['list'] = list(filter(lambda e: e != number_to_remove, self.tmp_memory['list']))
         return self.visitChildren(ctx)
 
-    def visitReverse(self, ctx:GoPoParser.ReverseContext):
+    def visitReverse(self, ctx: GoPoParser.ReverseContext):
         self.tmp_memory['list'].reverse()
         return self.visitChildren(ctx)
 
-    def visitSort(self, ctx:GoPoParser.SortContext):
+    def visitSort(self, ctx: GoPoParser.SortContext):
         is_descending = False if self.visit(ctx.getChild(2)) == '+' else True
         self.tmp_memory['list'].sort(reverse=is_descending)
 
