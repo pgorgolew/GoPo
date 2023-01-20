@@ -93,8 +93,9 @@ class BaseVisitor(GoPoVisitor):
     def visitRangeList(self, ctx: GoPoParser.RangeListContext):
         used_range = ctx.getChild(2).accept(self)
         start, end = used_range.split("...")
+        step = 1 if start < end else -1
 
-        return list(range(int(start), int(end) + 1))
+        return list(range(int(start), int(end) + step, step))
 
     def visitNumbersList(self, ctx: GoPoParser.NumbersListContext):
         return [self.convert_str_to_numeric(number.text) for number in ctx.numbers]
