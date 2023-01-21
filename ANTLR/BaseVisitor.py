@@ -39,6 +39,7 @@ class BaseVisitor(GoPoVisitor):
         super().__init__()
         self.memory = dict()
         self.tmp_memory = dict()
+        self.returned_value_from_list_function = None
 
     def visitChildren(self, node):
         if node.getChildCount() == 1:
@@ -147,6 +148,11 @@ class BaseVisitor(GoPoVisitor):
             self.tmp_memory['list'] = tmp_list
             ctx.getChild(1).accept(self)
 
+            if self.returned_value_from_list_function is not None:
+                result = self.returned_value_from_list_function
+                self.returned_value_from_list_function = None
+                return result
+
             result = self.tmp_memory['list']
             self.tmp_memory.clear()
             return result
@@ -207,6 +213,17 @@ class BaseVisitor(GoPoVisitor):
     def visitMapOpWithoutNum(self, ctx:GoPoParser.MapOpWithoutNumContext):
         function = lambda_one_arg_by_operator[ctx.op.type]
         self.tmp_memory['list'] = list(map(function, self.tmp_memory['list']))
+
+        return self.visitChildren(ctx)
+
+    def visitDropLast(self, ctx:GoPoParser.DropLastContext):
+        self.returned_value_from_list_function = self.tmp_memory['list'].pop()
+        
+        return self.visitChildren(ctx)
+
+    def visitDropWithIndex(self, ctx:GoPoParser.DropWithIndexContext):
+        index = self.convert_str_to_numeric(self.visit(ctx.getChild(2)))
+        self.returned_value_from_list_function = self.tmp_memory['list'].pop(index)
 
         return self.visitChildren(ctx)
 
