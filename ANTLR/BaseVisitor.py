@@ -197,6 +197,19 @@ class BaseVisitor(GoPoVisitor):
 
         return self.visitChildren(ctx)
 
+    def visitMapOpWithNum(self, ctx:GoPoParser.MapOpWithNumContext):
+        value = self.convert_str_to_numeric(self.visit(ctx.getChild(3)))
+        function = lambda_two_args_by_operator[ctx.op.type]
+        self.tmp_memory['list'] = [function(x, value) for x in self.tmp_memory['list']]
+
+        return self.visitChildren(ctx)
+
+    def visitMapOpWithoutNum(self, ctx:GoPoParser.MapOpWithoutNumContext):
+        function = lambda_one_arg_by_operator[ctx.op.type]
+        self.tmp_memory['list'] = list(map(function, self.tmp_memory['list']))
+
+        return self.visitChildren(ctx)
+
     @staticmethod
     def convert_str_to_numeric(s):
         try:
