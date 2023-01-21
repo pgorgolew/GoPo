@@ -218,12 +218,17 @@ class BaseVisitor(GoPoVisitor):
 
     def visitDropLast(self, ctx:GoPoParser.DropLastContext):
         self.returned_value_from_list_function = self.tmp_memory['list'].pop()
-        
+
         return self.visitChildren(ctx)
 
     def visitDropWithIndex(self, ctx:GoPoParser.DropWithIndexContext):
         index = self.convert_str_to_numeric(self.visit(ctx.getChild(2)))
         self.returned_value_from_list_function = self.tmp_memory['list'].pop(index)
+
+        return self.visitChildren(ctx)
+
+    def visitCount(self, ctx: GoPoParser.CountContext):
+        self.returned_value_from_list_function = len(self.tmp_memory['list'])
 
         return self.visitChildren(ctx)
 
