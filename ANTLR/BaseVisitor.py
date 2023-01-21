@@ -232,6 +232,11 @@ class BaseVisitor(GoPoVisitor):
 
         return self.visitChildren(ctx)
 
+    def visitSum(self, ctx:GoPoParser.SumContext):
+        self.returned_value_from_list_function = sum(self.tmp_memory['list'])
+
+        return self.visitChildren(ctx)
+
     @staticmethod
     def convert_str_to_numeric(s):
         try:
