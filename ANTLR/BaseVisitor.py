@@ -61,7 +61,7 @@ class BaseVisitor(GoPoVisitor):
         variable_name = ctx.getChild(0).accept(self)
         variable_value = ctx.getChild(2).accept(self)
 
-        if self.is_tmp_variable:
+        if self.is_tmp_variable and variable_name not in self.memory:
             self.tmp_memory[variable_name] = variable_value
         else:
             self.memory[variable_name] = variable_value
