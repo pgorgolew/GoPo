@@ -34,11 +34,16 @@ class VariableNotInList(Exception):
     pass
 
 
+class IndexOutOfRangeException(Exception):
+    pass
+
+
 class BaseVisitor(GoPoVisitor):
     def __init__(self):
         super().__init__()
         self.memory = dict()
         self.tmp_memory = dict()
+        self.is_tmp_variable = False
 
     def visitChildren(self, node):
         if node.getChildCount() == 1:
@@ -54,10 +59,12 @@ class BaseVisitor(GoPoVisitor):
 
     def visitAssignment(self, ctx: GoPoParser.AssignmentContext):
         variable_name = ctx.getChild(0).accept(self)
-        # print([method_name for method_name in dir(ctx.getChild(2))
-        #                   if callable(getattr(ctx.getChild(2), method_name))])
         variable_value = ctx.getChild(2).accept(self)
-        self.memory[variable_name] = variable_value
+
+        if self.is_tmp_variable and variable_name not in self.memory:
+            self.tmp_memory[variable_name] = variable_value
+        else:
+            self.memory[variable_name] = variable_value
 
     def visitParentnessExpr(self, ctx: GoPoParser.ParentnessExprContext):
         return ctx.getChild(1).accept(self)
@@ -147,6 +154,11 @@ class BaseVisitor(GoPoVisitor):
             self.tmp_memory['list'] = tmp_list
             ctx.getChild(1).accept(self)
 
+            if 'returned_value_from_list_function' in self.tmp_memory:
+                result = self.tmp_memory['returned_value_from_list_function']
+                self.tmp_memory.clear()
+                return result
+
             result = self.tmp_memory['list']
             self.tmp_memory.clear()
             return result
@@ -171,10 +183,10 @@ class BaseVisitor(GoPoVisitor):
         return self.visitChildren(ctx)
 
     def visitFilter(self, ctx: GoPoParser.FilterContext):
-        operator = self.visit(ctx.getChild(2))
+        operator = ctx.op.type
+        function = lambda_two_args_by_operator[operator]
         value = self.convert_str_to_numeric(self.visit(ctx.getChild(3)))
 
-        function = self.get_function_from_operator(operator)
         self.tmp_memory['list'] = [x for x in self.tmp_memory['list'] if function(x, value)]
 
         return self.visitChildren(ctx)
@@ -192,10 +204,73 @@ class BaseVisitor(GoPoVisitor):
         return self.visitChildren(ctx)
 
     def visitSort(self, ctx: GoPoParser.SortContext):
-        is_descending = False if self.visit(ctx.getChild(2)) == '+' else True
+        is_descending = False if ctx.op.type == GoPoParser.PLUS else True
         self.tmp_memory['list'].sort(reverse=is_descending)
 
         return self.visitChildren(ctx)
+
+    def visitMapOpWithNum(self, ctx:GoPoParser.MapOpWithNumContext):
+        value = self.convert_str_to_numeric(self.visit(ctx.getChild(3)))
+        function = lambda_two_args_by_operator[ctx.op.type]
+        self.tmp_memory['list'] = [function(x, value) for x in self.tmp_memory['list']]
+
+        return self.visitChildren(ctx)
+
+    def visitMapOpWithoutNum(self, ctx:GoPoParser.MapOpWithoutNumContext):
+        function = lambda_one_arg_by_operator[ctx.op.type]
+        self.tmp_memory['list'] = list(map(function, self.tmp_memory['list']))
+
+        return self.visitChildren(ctx)
+
+    def visitDropLast(self, ctx:GoPoParser.DropLastContext):
+        self.tmp_memory['returned_value_from_list_function'] = self.tmp_memory['list'].pop()
+
+        return self.visitChildren(ctx)
+
+    def visitDropWithIndex(self, ctx:GoPoParser.DropWithIndexContext):
+        index = self.convert_str_to_numeric(self.visit(ctx.getChild(2)))
+
+        if index >= len(self.tmp_memory['list']):
+            raise IndexOutOfRangeException(f"Index {index} out of range")
+
+        self.tmp_memory['returned_value_from_list_function'] = self.tmp_memory['list'].pop(index)
+
+        return self.visitChildren(ctx)
+
+    def visitCount(self, ctx: GoPoParser.CountContext):
+        self.tmp_memory['returned_value_from_list_function'] = len(self.tmp_memory['list'])
+
+        return self.visitChildren(ctx)
+
+    def visitSum(self, ctx:GoPoParser.SumContext):
+        self.tmp_memory['returned_value_from_list_function'] = sum(self.tmp_memory['list'])
+
+        return self.visitChildren(ctx)
+
+    def visitContains(self, ctx:GoPoParser.ContainsContext):
+        value = self.convert_str_to_numeric(self.visit(ctx.getChild(2)))
+        self.tmp_memory['returned_value_from_list_function'] = True if value in self.tmp_memory['list'] else False
+
+        return self.visitChildren(ctx)
+
+    def visitIs_empty(self, ctx: GoPoParser.Is_emptyContext):
+        self.tmp_memory['returned_value_from_list_function'] = True if len(self.tmp_memory['list']) == 0 else False
+
+        return self.visitChildren(ctx)
+
+    def visitClear(self, ctx: GoPoParser.ClearContext):
+        self.tmp_memory['list'].clear()
+
+    def visitPrint(self, ctx: GoPoParser.PrintContext):
+        print(self.visit(ctx.getChild(2)))
+
+    def visitForeach(self, ctx:GoPoParser.ForeachContext):
+        for value in self.tmp_memory['list']:
+            self.is_tmp_variable = True
+            self.tmp_memory[self.visit(ctx.getChild(2))] = value
+            self.visit(ctx.getChild(4))
+
+        self.is_tmp_variable = False
 
     @staticmethod
     def convert_str_to_numeric(s):
@@ -206,23 +281,10 @@ class BaseVisitor(GoPoVisitor):
         return s
 
     def get_from_memory(self, var_name):
+        if var_name in self.tmp_memory:
+            return self.tmp_memory[var_name]
+
         if var_name not in self.memory:
             raise VariableNotInitializedException(f"{var_name} was not initialized before")
 
         return self.memory[var_name]
-
-    @staticmethod
-    def get_function_from_operator(operator: String):
-        match operator:
-            case ">=":
-                return lambda_two_args_by_operator[GoPoParser.GTEQ]
-            case "<=":
-                return lambda_two_args_by_operator[GoPoParser.LTEQ]
-            case ">":
-                return lambda_two_args_by_operator[GoPoParser.GT]
-            case "<":
-                return lambda_two_args_by_operator[GoPoParser.LT]
-            case "==":
-                return lambda_two_args_by_operator[GoPoParser.EQ]
-            case "!=":
-                return lambda_two_args_by_operator[GoPoParser.NEQ]

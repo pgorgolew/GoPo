@@ -1986,6 +1986,7 @@ class GoPoParser ( Parser ):
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
             self.parser = parser
+            self.op = None # Token
 
         def SORT(self):
             return self.getToken(GoPoParser.SORT, 0)
@@ -2026,9 +2027,10 @@ class GoPoParser ( Parser ):
             self.state = 240
             self.match(GoPoParser.OPAR)
             self.state = 241
+            localctx.op = self._input.LT(1)
             _la = self._input.LA(1)
             if not(_la==27 or _la==28):
-                self._errHandler.recoverInline(self)
+                localctx.op = self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
                 self.consume()
