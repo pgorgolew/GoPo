@@ -251,6 +251,20 @@ class BaseVisitor(GoPoVisitor):
     def visitClear(self, ctx: GoPoParser.ClearContext):
         self.tmp_memory['list'].clear()
 
+    def visitPrint(self, ctx: GoPoParser.PrintContext):
+        print(self.visit(ctx.getChild(2)))
+
+    def visitForeach(self, ctx:GoPoParser.ForeachContext):
+        temp_variable = ctx.getChild(2).symbol.text
+        for value in self.tmp_memory['list']:
+            self.memory[temp_variable] = value
+            type = ctx.getChild(4).start.type
+            if  type in [GoPoParser.RULE_list_expr , GoPoParser.ASSIGN, GoPoParser.PRINT]:
+                self.visit(ctx.stat())
+            else:
+                self.visit(ctx.stat_block_newline())
+
+
     @staticmethod
     def convert_str_to_numeric(s):
         try:
