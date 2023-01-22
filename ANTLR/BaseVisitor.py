@@ -239,14 +239,17 @@ class BaseVisitor(GoPoVisitor):
 
     def visitContains(self, ctx:GoPoParser.ContainsContext):
         value = self.convert_str_to_numeric(self.visit(ctx.getChild(2)))
-        self.returned_value_from_list_function = True if value in self.tmp_memory["list"] else False
+        self.returned_value_from_list_function = True if value in self.tmp_memory['list'] else False
 
         return self.visitChildren(ctx)
 
     def visitIs_empty(self, ctx: GoPoParser.Is_emptyContext):
-        self.returned_value_from_list_function = True if len(self.tmp_memory["list"]) == 0 else False
+        self.returned_value_from_list_function = True if len(self.tmp_memory['list']) == 0 else False
 
         return self.visitChildren(ctx)
+
+    def visitClear(self, ctx: GoPoParser.ClearContext):
+        self.tmp_memory['list'].clear()
 
     @staticmethod
     def convert_str_to_numeric(s):
