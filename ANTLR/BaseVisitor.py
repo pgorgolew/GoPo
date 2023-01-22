@@ -34,12 +34,16 @@ class VariableNotInList(Exception):
     pass
 
 
+class IndexOutOfRangeException(Exception):
+    pass
+
+
 class BaseVisitor(GoPoVisitor):
     def __init__(self):
         super().__init__()
         self.memory = dict()
         self.tmp_memory = dict()
-        self.returned_value_from_list_function = None
+        self.is_tmp_variable = False
 
     def visitChildren(self, node):
         if node.getChildCount() == 1:
@@ -55,10 +59,12 @@ class BaseVisitor(GoPoVisitor):
 
     def visitAssignment(self, ctx: GoPoParser.AssignmentContext):
         variable_name = ctx.getChild(0).accept(self)
-        # print([method_name for method_name in dir(ctx.getChild(2))
-        #                   if callable(getattr(ctx.getChild(2), method_name))])
         variable_value = ctx.getChild(2).accept(self)
-        self.memory[variable_name] = variable_value
+
+        if self.is_tmp_variable:
+            self.tmp_memory[variable_name] = variable_value
+        else:
+            self.memory[variable_name] = variable_value
 
     def visitParentnessExpr(self, ctx: GoPoParser.ParentnessExprContext):
         return ctx.getChild(1).accept(self)
@@ -148,9 +154,9 @@ class BaseVisitor(GoPoVisitor):
             self.tmp_memory['list'] = tmp_list
             ctx.getChild(1).accept(self)
 
-            if self.returned_value_from_list_function is not None:
-                result = self.returned_value_from_list_function
-                self.returned_value_from_list_function = None
+            if 'returned_value_from_list_function' in self.tmp_memory:
+                result = self.tmp_memory['returned_value_from_list_function']
+                self.tmp_memory.clear()
                 return result
 
             result = self.tmp_memory['list']
@@ -217,34 +223,38 @@ class BaseVisitor(GoPoVisitor):
         return self.visitChildren(ctx)
 
     def visitDropLast(self, ctx:GoPoParser.DropLastContext):
-        self.returned_value_from_list_function = self.tmp_memory['list'].pop()
+        self.tmp_memory['returned_value_from_list_function'] = self.tmp_memory['list'].pop()
 
         return self.visitChildren(ctx)
 
     def visitDropWithIndex(self, ctx:GoPoParser.DropWithIndexContext):
         index = self.convert_str_to_numeric(self.visit(ctx.getChild(2)))
-        self.returned_value_from_list_function = self.tmp_memory['list'].pop(index)
+
+        if index >= len(self.tmp_memory['list']):
+            raise IndexOutOfRangeException(f"Index {index} out of range")
+
+        self.tmp_memory['returned_value_from_list_function'] = self.tmp_memory['list'].pop(index)
 
         return self.visitChildren(ctx)
 
     def visitCount(self, ctx: GoPoParser.CountContext):
-        self.returned_value_from_list_function = len(self.tmp_memory['list'])
+        self.tmp_memory['returned_value_from_list_function'] = len(self.tmp_memory['list'])
 
         return self.visitChildren(ctx)
 
     def visitSum(self, ctx:GoPoParser.SumContext):
-        self.returned_value_from_list_function = sum(self.tmp_memory['list'])
+        self.tmp_memory['returned_value_from_list_function'] = sum(self.tmp_memory['list'])
 
         return self.visitChildren(ctx)
 
     def visitContains(self, ctx:GoPoParser.ContainsContext):
         value = self.convert_str_to_numeric(self.visit(ctx.getChild(2)))
-        self.returned_value_from_list_function = True if value in self.tmp_memory['list'] else False
+        self.tmp_memory['returned_value_from_list_function'] = True if value in self.tmp_memory['list'] else False
 
         return self.visitChildren(ctx)
 
     def visitIs_empty(self, ctx: GoPoParser.Is_emptyContext):
-        self.returned_value_from_list_function = True if len(self.tmp_memory['list']) == 0 else False
+        self.tmp_memory['returned_value_from_list_function'] = True if len(self.tmp_memory['list']) == 0 else False
 
         return self.visitChildren(ctx)
 
@@ -255,15 +265,16 @@ class BaseVisitor(GoPoVisitor):
         print(self.visit(ctx.getChild(2)))
 
     def visitForeach(self, ctx:GoPoParser.ForeachContext):
-        temp_variable = ctx.getChild(2).symbol.text
         for value in self.tmp_memory['list']:
-            self.memory[temp_variable] = value
+            self.is_tmp_variable = True
+            self.tmp_memory[self.visit(ctx.getChild(2))] = value
             type = ctx.getChild(4).start.type
-            if  type in [GoPoParser.RULE_list_expr , GoPoParser.ASSIGN, GoPoParser.PRINT]:
+            if type in [GoPoParser.RULE_list_expr, GoPoParser.ASSIGN, GoPoParser.PRINT]:
                 self.visit(ctx.stat())
             else:
                 self.visit(ctx.stat_block_newline())
 
+        self.is_tmp_variable = False
 
     @staticmethod
     def convert_str_to_numeric(s):
@@ -274,6 +285,9 @@ class BaseVisitor(GoPoVisitor):
         return s
 
     def get_from_memory(self, var_name):
+        if var_name in self.tmp_memory:
+            return self.tmp_memory[var_name]
+
         if var_name not in self.memory:
             raise VariableNotInitializedException(f"{var_name} was not initialized before")
 
