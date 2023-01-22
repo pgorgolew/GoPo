@@ -268,11 +268,7 @@ class BaseVisitor(GoPoVisitor):
         for value in self.tmp_memory['list']:
             self.is_tmp_variable = True
             self.tmp_memory[self.visit(ctx.getChild(2))] = value
-            type = ctx.getChild(4).start.type
-            if type in [GoPoParser.RULE_list_expr, GoPoParser.ASSIGN, GoPoParser.PRINT]:
-                self.visit(ctx.stat())
-            else:
-                self.visit(ctx.stat_block_newline())
+            self.visit(ctx.getChild(4))
 
         self.is_tmp_variable = False
 
