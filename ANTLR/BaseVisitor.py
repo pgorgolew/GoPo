@@ -16,7 +16,10 @@ lambda_two_args_by_operator = {
     GoPoParser.LT: lambda x, y: x < y,
     GoPoParser.GT: lambda x, y: x > y,
     GoPoParser.EQ: lambda x, y: x == y,
-    GoPoParser.NEQ: lambda x, y: x != y
+    GoPoParser.NEQ: lambda x, y: x != y,
+    GoPoParser.AND: lambda x, y: x and y,
+    GoPoParser.OR: lambda x, y: x or y,
+
 }
 
 lambda_one_arg_by_operator = {
@@ -82,7 +85,7 @@ class BaseVisitor(GoPoVisitor):
 
     def visitLogicExpr(self, ctx: GoPoParser.LogicExprContext):
         if ctx.op.type == GoPoParser.NOT:
-            return not self.visit(ctx.expression())
+            return not self.visit(ctx.getChild(1))
 
         left = self.visit(ctx.left)
         right = self.visit(ctx.right)
