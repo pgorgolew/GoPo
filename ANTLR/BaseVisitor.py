@@ -76,6 +76,10 @@ class BaseVisitor(GoPoVisitor):
         left = self.visit(ctx.left)
         right = self.visit(ctx.right)
         operation = lambda_two_args_by_operator[ctx.op.type]
+
+        if type(left) == str or type(right) == str:
+            left, right = str(left), str(right)
+
         return operation(left, right)
 
     def visitMathOneExprFun(self, ctx: GoPoParser.MathOneExprFunContext):

@@ -5,7 +5,7 @@ from BaseVisitor import BaseVisitor
 
 
 def main():
-    input_stream = FileStream("testing_visitor.txt")
+    input_stream = FileStream("example.txt")
     lexer = GoPoLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = GoPoParser(stream)
